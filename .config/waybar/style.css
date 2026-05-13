@@ -1,0 +1,108 @@
+@import "../colors/colors.css";
+
+/* =========================
+   CONFIGURAÇÃO BASE
+========================= */
+* {
+    font-size: 14px;
+    font-family: "FiraCode Nerd Font", "Symbols Nerd Font";
+    color: @foreground;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+#waybar {
+    background: transparent; /* Fundo transparente para os blocos flutuarem */
+}
+
+/* =========================
+   ESTILO DOS BLOCOS (Pílulas)
+========================= */
+#custom-power,
+#workspaces,
+#tray,
+#bluetooth,
+#network,
+#battery,
+#pulseaudio,
+#clock {
+    background: @surface;
+    margin: 4px 3px;
+    padding: 0px 12px;
+    border-radius: 8px; /* Arredondamento suave da imagem */
+}
+
+/* =========================
+   AGRUPAMENTO (Módulos Colados)
+========================= */
+
+/* 1. Power + Workspaces (Esquerda) */
+#custom-power {
+    margin-right: 0;
+    border-radius: 8px 0px 0px 8px;
+    color: @error;
+}
+
+#workspaces {
+    margin-left: 0;
+    border-radius: 0px 8px 8px 0px;
+    padding: 0px 4px;
+}
+
+/* 2. Tray e Bluetooth (Direita) */
+#tray {
+    margin-right: 0;
+    border-radius: 8px 0px 0px 8px;
+}
+
+#bluetooth {
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 0px;
+}
+
+/* 3. Network e Battery */
+#network {
+    margin-right: 0;
+    border-radius: 8px 0px 0px 8px;
+}
+
+#battery {
+    margin-left: 0;
+    border-radius: 0px 8px 8px 0px;
+}
+
+/* =========================
+   DETALHES DOS WORKSPACES
+========================= */
+#workspaces button {
+    padding: 0px 8px;
+    color: @foreground;
+    background: transparent;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+#workspaces button.active {
+    background: @primary;
+    color: @surface; /* Cor de contraste */
+}
+
+#workspaces button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* =========================
+   CORES DOS ÍCONES (Conforme imagem)
+========================= */
+#network { color: @primary; }
+#pulseaudio { color: @tertiary; }
+#battery { color: @secondary; }
+#clock { color: @foreground; }
+#bluetooth { color: @secondary; }
+
+/* Ajuste específico para o relógio na direita */
+#clock {
+    margin-right: 10px;
+}

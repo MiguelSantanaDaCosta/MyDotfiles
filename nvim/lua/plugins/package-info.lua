@@ -3,6 +3,6 @@ return {
     dependencies = {
         "MunifTanjim/nui.nvim",
     },
-    event = "BufRead package.json",
+   event = "BufRead package.json", 
     config = true,
 }

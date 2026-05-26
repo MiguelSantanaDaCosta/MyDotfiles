@@ -3,7 +3,7 @@ return {
     build = ":TSUpdate",
 
     config = function()
-        require("nvim-treesitter").setup({
+        require("nvim-treesitter.configs").setup({
             auto_install = true,
             ensure_installed = {
                 "bash",
@@ -16,9 +16,17 @@ return {
                 "css",
                 "markdown",
                 "markdown_inline",
+                "java",
+                "json",
+                "yaml",
+                "toml",
             },
-            highlight = { enable = true },
-            indent = { enable = true },
+            highlight = {
+                enable = true,
+            },
+            indent = {
+                enable = true,
+            },
         })
     end
 }

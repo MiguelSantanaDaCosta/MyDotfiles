@@ -1,0 +1,911 @@
+--- SUMÁRIO DE ARQUIVOS (53 arquivos) ---
+lua/options.lua
+lua/plugins/colorizer.lua
+lua/plugins/gitsigns.lua
+lua/plugins/neo-tree.lua
+lua/plugins/render-markdown.lua
+lua/plugins/toggleterm.lua
+lua/plugins/catppuccin.lua
+lua/plugins/harpoon.lua
+lua/plugins/trouble.lua
+lua/plugins/zen-mode.lua
+lua/plugins/tpipeline.lua
+lua/plugins/diffview.lua
+lua/plugins/persistence.lua
+lua/plugins/overseer.lua
+lua/plugins/sniprun.lua
+lua/plugins/yanky.lua
+lua/plugins/neodev.lua
+lua/plugins/project.lua
+lua/plugins/dressing.lua
+lua/plugins/neogen.lua
+lua/plugins/outline.lua
+lua/plugins/dap.lua
+lua/plugins/vim-startup.lua
+lua/plugins/spectre.lua
+lua/plugins/undotree.lua
+lua/plugins/navic.lua
+lua/plugins/mini-nvim.lua
+lua/plugins/aerial.lua
+lua/plugins/database.lua
+lua/plugins/gx.lua
+lua/plugins/better-escape.lua
+lua/plugins/package-info.lua
+lua/plugins/flash.lua
+lua/plugins/refactoring.lua
+lua/plugins/alpha.lua
+lua/plugins/minimap.lua
+lua/plugins/autopairs.lua
+lua/plugins/markdown-preview.lua
+lua/plugins/neotest.lua
+lua/plugins/noice.lua
+lua/plugins/pantran.lua
+lua/plugins/scroll.lua
+lua/plugins/todo-comments.lua
+lua/plugins/multicursor.lua
+lua/plugins/ts-context.lua
+lua/plugins/treesitter.lua
+lua/plugins/rainbow-delimiters.lua
+lua/tomorrow_burns/palette.lua
+lua/tomorrow_burns/init.lua
+lua/fahrenheit/init.lua
+lua/fahrenheit/palette.lua
+colors/tomorrow-burns.lua
+colors/fahrenheit.lua
+-------------------------------------------
+===== lua/options.lua =====
+local opt = vim.opt
+
+-- Setup Options Neovim --
+
+opt.laststatus = 3
+opt.showmode = false
+opt.undofile = true
+
+-- Line numbers
+opt.number = true                   -- Display line numbers
+opt.numberwidth = 2                 -- Set min number column width
+
+-- Display and UI
+opt.cursorline = true               -- Highlight cursor line
+opt.fillchars = { eob = " " }       -- Hide '~' on empty buffer lines
+opt.wrap = false                    -- Disable wrap line
+opt.sidescroll = 1                  -- Scroll 1-char horizontally
+opt.sidescrolloff = 5               -- Keep 5-char margin
+opt.signcolumn = "yes"
+opt.winborder = "rounded"
+
+-- Set tab = 4 space
+opt.expandtab = true
+opt.tabstop = 4
+opt.softtabstop = 4
+opt.shiftwidth = 4
+
+-- Set color
+opt.termguicolors = true
+
+-- Sync clipboard between OS and Neovim.
+opt.clipboard = "unnamedplus"
+===== lua/plugins/colorizer.lua =====
+return {
+    "catgoose/nvim-colorizer.lua",
+    event = "BufReadPre",
+
+    config = function()
+        require("colorizer").setup({
+            filetypes = { "*" },
+            user_default_options = {
+                mode = "background",
+                names = false,
+                css = true,
+            },
+        })
+    end
+}
+===== lua/plugins/gitsigns.lua =====
+return {
+    "lewis6991/gitsigns.nvim",
+
+    config = function()
+        require("gitsigns").setup({
+            current_line_blame = true,
+        })
+    end
+}
+===== lua/plugins/neo-tree.lua =====
+return {
+    "nvim-neo-tree/neo-tree.nvim",
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        "nvim-tree/nvim-web-devicons",
+        "MunifTanjim/nui.nvim",
+    },
+
+    config = function()
+        require("neo-tree").setup({
+            filesystem = {
+                filtered_items = {
+                    visible = true,            -- Show hidden file
+                    hide_dotfiles = false,     -- Show dotfile
+                    hide_gitignored = true,    -- Show git ignore file
+                },
+            },
+            window = {
+                width = 25, -- Set width window neotree (default 40)
+            },
+        })
+        vim.keymap.set("n", "<leader>e", ":Neotree filesystem reveal left<CR>", { desc = "Open File Explorer", silent = true })  -- Space e
+    end
+}
+===== lua/plugins/render-markdown.lua =====
+return {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = {
+        'nvim-treesitter/nvim-treesitter',
+        'nvim-tree/nvim-web-devicons',
+    },
+
+    config = function()
+        require("render-markdown").setup({})
+    end
+}
+===== lua/plugins/toggleterm.lua =====
+return {
+    "akinsho/toggleterm.nvim",
+
+    config = function()
+        require("toggleterm").setup({
+            start_in_insert = false
+        })
+        vim.keymap.set("n", "<leader>`", ":ToggleTerm size=10 direction=horizontal<CR>", { desc = "Open Bottom Terminal", silent = true })  -- Space `
+        vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], {})
+    end
+}
+===== lua/plugins/catppuccin.lua =====
+return {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+
+    config = function()
+        require("catppuccin").setup({
+            flavour = "mocha",  -- latte, frappe, macchiato, mocha
+            transparent_background = true,
+            float = {
+                transparent = true,
+            }
+        })
+        --vim.cmd.colorscheme("catppuccin")
+    end
+}
+===== lua/plugins/harpoon.lua =====
+return {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" }, -- Já está no seu lockfile [cite: 77]
+    config = function()
+        local harpoon = require("harpoon")
+        harpoon:setup()
+
+        vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end, { desc = "Harpoon Mark File" })
+        vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+
+        -- Atalhos rápidos para os primeiros 4 arquivos
+        vim.keymap.set("n", "<A-1>", function() harpoon:list():select(1) end)
+        vim.keymap.set("n", "<A-2>", function() harpoon:list():select(2) end)
+        vim.keymap.set("n", "<A-3>", function() harpoon:list():select(3) end)
+        vim.keymap.set("n", "<A-4>", function() harpoon:list():select(4) end)
+    end
+}
+===== lua/plugins/trouble.lua =====
+return {
+    "folke/trouble.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = {},
+    keys = {
+        { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
+        { "<leader>xl", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
+    },
+}
+===== lua/plugins/zen-mode.lua =====
+return {
+    "folke/zen-mode.nvim",
+    opts = {
+        window = {
+            width = .85, -- Largura da janela central
+            options = {
+                number = false,
+                relativenumber = false,
+            }
+        },
+    },
+    keys = {
+        { "<leader>z", "<cmd>ZenMode<cr>", desc = "Toggle Zen Mode" }
+    }
+}
+===== lua/plugins/tpipeline.lua =====
+return {
+    "vimpostor/vim-tpipeline",
+    -- Este plugin funciona melhor se você usa Tmux ou integra a barra do terminal.
+}
+===== lua/plugins/diffview.lua =====
+return {
+    "sindrets/diffview.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "DiffviewOpen", "DiffviewFileHistory" },
+    keys = {
+        { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Git Diff View" },
+        { "<leader>gh", "<cmd>DiffviewFileHistory %", desc = "File History" },
+    }
+}
+===== lua/plugins/persistence.lua =====
+return {
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    opts = {},
+    keys = {
+        -- Restaura a sessão do diretório atual
+        { "<leader>qs", function() require("persistence").load() end, desc = "Restore Session" },
+        -- Restaura a última sessão salva
+        { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+    }
+}
+===== lua/plugins/overseer.lua =====
+return {
+    "stevearc/overseer.nvim",
+    opts = {
+        strategy = "terminal",
+        templates = { "builtin" },
+    },
+    config = function(_, opts)
+        local overseer = require("overseer")
+        overseer.setup(opts)
+
+        -- Atalho para rodar (Run)
+        vim.keymap.set("n", "<F5>", "<cmd>OverseerRun<cr>", { desc = "Run Task (NetBeans style)" })
+        -- Atalho para abrir os logs/output
+        vim.keymap.set("n", "<F6>", "<cmd>OverseerToggle<cr>", { desc = "Toggle Output Panel" })
+    end
+}
+===== lua/plugins/sniprun.lua =====
+return {
+    "michaelb/sniprun",
+    build = "sh ./install.sh",
+    config = function()
+        require("sniprun").setup({
+            display = { "VirtualTextOk", "Terminal" } -- Mostra resultado ao lado do código ou no terminal
+        })
+        -- Atalho para rodar a linha atual ou seleção visual
+        vim.keymap.set({ "n", "v" }, "<leader>rr", "<cmd>SnipRun<cr>", { desc = "Run Snippet" })
+    end
+}
+===== lua/plugins/yanky.lua =====
+return {
+    "gbprod/yanky.nvim",
+    opts = {
+        highlight = {
+            on_put = true,
+            on_yank = true,
+            timer = 200,
+        },
+        preserve_cursor_position = {
+            enabled = true,
+        },
+    },
+    config = function(_, opts)
+        require("yanky").setup(opts)
+        
+        -- Colar ajustando a identação automaticamente
+        vim.keymap.set({"n", "x"}, "p", "<Plug>(YankPutAfterFilter)", { desc = "Colar com auto-identação" })
+        vim.keymap.set({"n", "x"}, "P", "<Plug>(YankPutBeforeFilter)", { desc = "Colar antes com auto-identação" })
+    end
+}
+===== lua/plugins/neodev.lua =====
+return {
+    "folke/neodev.nvim",
+    opts = {},
+}
+===== lua/plugins/project.lua =====
+return {
+    "ahmedkhalf/project.nvim",
+    config = function()
+        require("project_nvim").setup({})
+        require('telescope').load_extension('projects')
+    end,
+    keys = {
+        { "<leader>fp", "<cmd>Telescope projects<cr>", desc = "Find Projects" },
+    }
+}
+===== lua/plugins/dressing.lua =====
+return {
+    'stevearc/dressing.nvim',
+    opts = {},
+}
+===== lua/plugins/neogen.lua =====
+return {
+    "danymat/neogen",
+    dependencies = "nvim-treesitter/nvim-treesitter",
+    config = true,
+    keys = {
+        { "<leader>nf", function() require('neogen').generate() end, desc = "Gerar Docstring (Função/Classe)" }
+    }
+}
+===== lua/plugins/outline.lua =====
+return {
+    "simrat39/symbols-outline.nvim",
+    config = true,
+    keys = {
+        { "<leader>so", "<cmd>SymbolsOutline<cr>", desc = "Listar Símbolos do Arquivo" }
+    }
+}
+===== lua/plugins/dap.lua =====
+return {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+        "rcarriga/nvim-dap-ui",
+        "nvim-neotest/nvim-nio",
+    },
+    config = function()
+        local dap, dapui = require("dap"), require("dapui")
+        dapui.setup()
+        dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
+        dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
+        
+        vim.keymap.set("n", "<F9>", dap.toggle_breakpoint)
+        vim.keymap.set("n", "<F10>", dap.continue)
+    end
+}
+===== lua/plugins/vim-startup.lua =====
+return {
+    "dstein64/vim-startuptime",
+    cmd = "StartupTime",
+    config = function()
+        vim.g.startuptime_tries = 10
+    end,
+}
+===== lua/plugins/spectre.lua =====
+return {
+    "nvim-pack/nvim-spectre",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    keys = {
+        { "<leader>S", function() require("spectre").toggle() end, desc = "Busca e Substituição Global" },
+    },
+}
+===== lua/plugins/undotree.lua =====
+return {
+  "mbbill/undotree",
+  keys = {
+    { "<leader>u", vim.cmd.UndotreeToggle, desc = "Visualizar Árvore de Undo" }
+  }
+}
+===== lua/plugins/navic.lua =====
+return {
+  "SmiteshP/nvim-navic",
+  dependencies = "neovim/nvim-lspconfig",
+  opts = {
+    highlight = true,
+    separator = " > ",
+    lsp = { auto_attach = true },
+  }
+}
+===== lua/plugins/mini-nvim.lua =====
+return {
+    "nvim-mini/mini.nvim",
+
+    config = function()
+        -- Auto pairs
+        --local pairs = require("mini.pairs")
+        --pairs.setup({})
+
+        -- Surround
+        local surround = require("mini.surround")
+        surround.setup({})
+
+        -- Comment code
+        local comment = require("mini.comment")
+        comment.setup({
+            ignore_blank_line = true,
+        })
+        vim.keymap.set("n", "<leader>/", "gcc", { remap = true, desc = "Toggle Comment (Normal mode)" })    -- Space /
+        vim.keymap.set("v", "<leader>/", "gc", { remap = true, desc = "Toggle Comment (Visual mode)" })     -- Space /
+    end
+}
+===== lua/plugins/aerial.lua =====
+return {
+    "stevearc/aerial.nvim",
+    opts = {},
+    dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "nvim-tree/nvim-web-devicons"
+    },
+    config = function()
+        require("aerial").setup({
+            on_attach = function(bufnr)
+                -- Atalho local para pular entre símbolos
+                vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
+                vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
+            end,
+        })
+        -- Atalho global para abrir o menu
+        vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle!<CR>", { desc = "Symbols Outline" })
+    end
+}
+===== lua/plugins/database.lua =====
+return {
+    "kristijanhusak/vim-dadbod-ui",
+    dependencies = {
+        { "tpope/vim-dadbod", lazy = true },
+        { "kristijanhusak/vim-dadbod-completion", ft = { "sql", "mysql", "plsql" }, lazy = true },
+    },
+    cmd = {
+        "DBUI",
+        "DBUIToggle",
+        "DBUIAddConnection",
+        "DBUIFindBuffer",
+    },
+    init = function()
+        vim.g.db_ui_use_nerd_fonts = 1
+    end,
+}
+===== lua/plugins/gx.lua =====
+return {
+    "chrishrb/gx.nvim",
+    keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = true,
+}
+===== lua/plugins/better-escape.lua =====
+return {
+    "max397574/better-escape.nvim",
+    config = function()
+        require("better_escape").setup()
+    end,
+}
+===== lua/plugins/package-info.lua =====
+return {
+    "vuki656/package-info.nvim",
+    dependencies = {
+        "MunifTanjim/nui.nvim",
+    },
+    event = "BufRead package.json",
+    config = true,
+}
+===== lua/plugins/flash.lua =====
+return{
+  "folke/flash.nvim",
+  event = "VeryLazy",
+  ---@type Flash.Config
+  opts = {},
+  keys = {
+    { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+    { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+    { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+    { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+    { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+  },
+}
+===== lua/plugins/refactoring.lua =====
+return {
+    "ThePrimeagen/refactoring.nvim",
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        "nvim-treesitter/nvim-treesitter",
+    },
+    keys = {
+        -- Carrega apenas ao usar o atalho no modo visual (x)
+        { "<leader>re", function() require('refactoring').select_refactor() end, mode = "x", desc = "Refactor" }
+    },
+    config = function()
+        require("refactoring").setup({})
+    end,
+}
+===== lua/plugins/alpha.lua =====
+return {
+  "goolord/alpha-nvim",
+  lazy = false,
+  dependencies = {
+    "amansingh-afk/milli.nvim",
+    "nvim-tree/nvim-web-devicons",
+  },
+  config = function()
+    local alpha = require("alpha")
+    local dashboard = require("alpha.themes.dashboard")
+    local milli = require("milli")
+
+    -- 1. Carregar a animação da mariposa (moth.lua)
+    local splash = milli.load({ splash = "moth" })
+
+    -- 2. Configurar o Header com o primeiro frame
+    dashboard.section.header.val = splash.frames[1]
+    dashboard.section.header.opts.hl = "Normal"
+
+    -- 3. Seus botões padrão
+    dashboard.section.buttons.val = {
+      dashboard.button("n", "  Novo Projeto", ":enew <CR>"),
+      dashboard.button("r", "󰄉  Arquivos Recentes", ":Telescope oldfiles <CR>"),
+      dashboard.button("c", "  Configurações (init.lua)", ":e $MYVIMRC <CR>"),
+      dashboard.button("q", "󰅚  Sair", ":qa<CR>"),
+    }
+
+    -- 4. Estética
+    dashboard.section.buttons.opts.hl = "AlphaButton"
+    dashboard.opts.layout[1].val = 2 -- Espaço no topo
+
+    alpha.setup(dashboard.opts)
+
+    -- 5. Iniciar animação (Milli sobrepõe o header do Alpha)
+    milli.alpha({ splash = "moth", loop = true })
+  end,
+}
+===== lua/plugins/minimap.lua =====
+return {
+  "gorbit99/codewindow.nvim",
+  dependencies = { "nvim-treesitter/nvim-treesitter" },
+  config = function()
+    local codewindow = require('codewindow')
+    codewindow.setup({
+      active_in_terminals = false,
+      auto_enable = false,
+      exclude_filetypes = { 'help', 'NvimTree', 'neo-tree', 'alpha' }, -- Não abre no Alpha nem no Neo-tree
+      focus_on_events = { 'WinEnter', 'CursorHold' },
+    })
+  end,
+  keys = {
+    { "<leader>mm", function() require('codewindow').toggle_minimap() end, desc = "Toggle Minimap" },
+    { "<leader>mf", function() require('codewindow').toggle_focus() end, desc = "Focus Minimap" },
+  },
+}
+===== lua/plugins/autopairs.lua =====
+return {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = function()
+        local autopairs = require("nvim-autopairs")
+        autopairs.setup({
+            check_ts = true, -- Usa Treesitter para ser mais inteligente
+            ts_config = {
+                lua = { "string" },
+                java = { "string_literal" },
+            },
+        })
+    end
+}
+===== lua/plugins/markdown-preview.lua =====
+-- No seu arquivo markdown-preview.lua
+return {
+  "iamcco/markdown-preview.nvim",
+  cmd = { "MarkdownPreviewToggle", "MarkdownPreview" },
+  ft = { "markdown" },
+  build = function() vim.fn["mkdp#util#install"]() end, -- Forma mais segura de build
+}
+===== lua/plugins/neotest.lua =====
+return {
+  "nvim-neotest/neotest",
+  dependencies = {
+    "nvim-neotest/nvim-nio",
+    "nvim-lua/plenary.nvim",
+    "nvim-treesitter/nvim-treesitter",
+    "nvim-neotest/neotest-python",
+    "rcasia/neotest-java",
+  },
+  config = function()
+    require("neotest").setup({
+      adapters = {
+        require("neotest-python")({
+          dap = { justMyCode = false },
+        }),
+        require("neotest-java"),
+      },
+    })
+  end,
+  keys = {
+    { "<leader>tr", function() require("neotest").run.run() end, desc = "Rodar Teste" },
+    { "<leader>ts", function() require("neotest").summary.toggle() end, desc = "Painel de Testes" },
+  },
+}
+===== lua/plugins/noice.lua =====
+return {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+    opts = {
+        lsp = {
+            override = {
+                ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+                ["vim.lsp.util.set_autocmd_table"] = true,
+            },
+        },
+        presets = {
+            bottom_search = true,
+            command_palette = true,
+            long_message_to_split = true,
+        },
+    },
+}
+===== lua/plugins/pantran.lua =====
+return {
+    "potamides/pantran.nvim",
+    opts = {},
+    keys = {
+        { "<leader>rt", "<cmd>Pantran<cr>", mode = { "n", "x" }, desc = "Traduzir texto" },
+    },
+}
+===== lua/plugins/scroll.lua =====
+return {
+  "karb94/neoscroll.nvim",
+  config = function()
+    require('neoscroll').setup({
+      -- Desativa em arquivos muito grandes para não perder performance
+      hide_cursor = true,          -- Esconde o cursor durante o scroll
+      stop_eof = true,             -- Para no fim do arquivo
+      respect_scrolloff = false,   -- O scroll para exatamente onde você mandou
+      cursor_scroll_step = 4,      -- Velocidade do scroll
+      easing_function = "quadratic", -- Deixa o movimento mais "orgânico"
+    })
+
+    -- Atalhos customizados para um scroll mais suave
+    local t = {}
+    t['<C-u>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '450'}}
+    t['<C-d>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '450'}}
+    t['zt']    = {'zt', {'250'}}
+    t['zz']    = {'zz', {'250'}}
+    t['zb']    = {'zb', {'250'}}
+
+    require('neoscroll.config').set_mappings(t)
+  end
+}
+===== lua/plugins/todo-comments.lua =====
+return {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "TodoTelescope", "TodoQuickFix" }, -- Carrega apenas quando usar o comando
+    opts = {
+        highlight = {
+            keyword = "wide", -- Destaca bem a palavra (TODO, FIXME)
+        },
+    },
+    keys = {
+        { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Search TODOs" },
+    }
+}
+===== lua/plugins/multicursor.lua =====
+return {
+    "mg979/vim-visual-multi",
+    keys = {
+        { "<C-n>", mode = { "n", "x" }, desc = "Multicursor" },
+    },
+    -- Remova a linha: event = "BufReadPost"
+}
+
+===== lua/plugins/ts-context.lua =====
+return {
+    "nvim-treesitter/nvim-treesitter-context",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {
+        enable = true,
+        max_lines = 3,
+        trim_scope = 'outer',
+        -- Desativa o context em arquivos muito grandes:
+        on_attach = function(bufnr)
+            local line_count = vim.api.nvim_buf_line_count(bufnr)
+            if line_count > 2500 then
+                return false
+            end
+            return true
+        end,
+    }
+}
+
+===== lua/plugins/treesitter.lua =====
+return {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+
+    config = function()
+        require("nvim-treesitter.configs").setup({
+            auto_install = true,
+            ensure_installed = {
+                "bash",
+                "lua",
+                "c",
+                "cpp",
+                "python",
+                "javascript",
+                "html",
+                "css",
+                "markdown",
+                "markdown_inline",
+                "java",
+                "json",
+                "yaml",
+                "toml",
+            },
+            highlight = {
+                enable = true,
+            },
+            indent = {
+                enable = true,
+            },
+        })
+    end
+}
+
+===== lua/plugins/rainbow-delimiters.lua =====
+return {
+    "HiPhish/rainbow-delimiters.nvim",
+    config = function()
+        local rainbow_delimiters =
+            require("rainbow-delimiters")
+
+        vim.g.rainbow_delimiters = {
+            strategy = {
+                [''] = rainbow_delimiters.strategy.global,
+            },
+            query = {
+                [''] = 'rainbow-delimiters',
+            },
+            highlight = {
+                'RainbowDelimiterRed',
+                'RainbowDelimiterYellow',
+                'RainbowDelimiterOrange',
+            },
+        }
+    end
+}
+
+===== lua/tomorrow_burns/palette.lua =====
+local M = {}
+
+M.colors = {
+  -- core
+  bg        = "#151515",
+  bg_alt    = "#252525",
+  fg        = "#a1b0b8",
+
+  -- ansi palette
+  black     = "#252525",
+  red       = "#832e31",
+  green     = "#a63c40",
+  yellow    = "#d3494e",
+  blue      = "#fc595f",
+  magenta   = "#df9395",
+  cyan      = "#ba8586",
+  white     = "#f5f5f5",
+
+  bright_black   = "#5d6f71",
+  bright_red     = "#832e31",
+  bright_green   = "#a63c40",
+  bright_yellow  = "#d2494e",
+  bright_blue    = "#fc595f",
+  bright_magenta = "#df9395",
+  bright_cyan    = "#ba8586",
+  bright_white   = "#f5f5f5",
+
+  cursor     = "#ff443e",
+  cursor_txt = "#b0c2c4",
+
+  selection_bg = "#b0bec5",
+  selection_fg = "#2a2d32",
+}
+
+return M
+===== lua/tomorrow_burns/init.lua =====
+local M = {}
+
+local defaults = {
+  transparent = true,
+  italic_comments = true,
+  dim_inactive = false,
+}
+
+M.options = vim.deepcopy(defaults)
+
+function M.setup(opts)
+  M.options = vim.tbl_deep_extend("force", defaults, opts or {})
+end
+
+function M.get_options()
+  return M.options
+end
+
+return M
+===== lua/fahrenheit/init.lua =====
+local M = {}
+
+function M.setup()
+  vim.cmd("highlight clear")
+  if vim.fn.exists("syntax_on") then
+    vim.cmd("syntax reset")
+  end
+
+  vim.o.background = "dark"
+  vim.g.colors_name = "fahrenheit"
+
+  local palette = require("fahrenheit.palette")
+  local highlights = require("fahrenheit.highlights")
+
+  highlights.setup(palette)
+end
+
+return M
+===== lua/fahrenheit/palette.lua =====
+local M = {}
+
+M.colors = {
+  -- base
+  bg = "#000000",
+  fg = "#ffffce",
+
+  cursor = "#bbbbbb",
+  selection = "#4e739f",
+  selection_fg = "#ffffce",
+
+  -- ANSI 0-7
+  black   = "#1d1d1d",
+  red     = "#cda074",
+  green   = "#ad8157",
+  yellow  = "#fecf75",
+  blue    = "#7f0e0f",
+  magenta = "#734c4d",
+  cyan    = "#ee2c2c", -- agora virou vermelho forte
+  white   = "#ffffce",
+
+  -- extras
+  tomato  = "#FF6347",
+  sienna  = "#A0522D",
+  rosy    = "#BC8F8F",
+  wood    = "#DEB887",
+  firebrick = "#ee2c2c",
+  brow    = "#a52a2a",
+  choco   = "#d2691e",
+  indi    = "#8b4513",
+  orange  = "#ffa500",
+
+  -- ANSI 8-15
+  bright_black   = "#1c1c1c",
+  bright_red     = "#fecea0",
+  bright_green   = "#cc734d",
+  bright_yellow  = "#fd9f4d",
+  bright_blue    = "#cb4a05",
+  bright_magenta = "#1c1c1c",
+  bright_cyan    = "#fed04d",
+  bright_white   = "#ffffff",
+}
+
+return M
+===== colors/tomorrow-burns.lua =====
+vim.cmd("highlight clear")
+
+if vim.fn.exists("syntax_on") then
+  vim.cmd("syntax reset")
+end
+
+vim.g.colors_name = "tomorrow-burns"
+
+-- 🔥 FORÇA o carregamento correto do lua/
+local ok, theme = pcall(require, "tomorrow_burns")
+
+if not ok then
+  vim.notify("Erro ao carregar tomorrow_burns", vim.log.levels.ERROR)
+  return
+end
+
+local colors = require("tomorrow_burns.palette").colors
+local opts = theme.get_options()
+
+require("tomorrow_burns.highlights").setup(colors, opts)
+===== colors/fahrenheit.lua =====
+local palette = require("fahrenheit.palette").colors
+local highlights = require("fahrenheit.highlights")
+
+-- limpa tudo
+vim.cmd("hi clear")
+if vim.fn.exists("syntax_on") then
+  vim.cmd("syntax reset")
+end
+
+vim.o.termguicolors = true
+vim.g.colors_name = "fahrenheit"
+
+-- 👇 AQUI É O QUE FALTA
+highlights.setup(palette)

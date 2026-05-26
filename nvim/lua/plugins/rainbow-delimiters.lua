@@ -1,21 +1,21 @@
--- No arquivo do rainbow-delimiters.lua
 return {
     "HiPhish/rainbow-delimiters.nvim",
     config = function()
-        local rb = require("rainbow-delimiters")
-        require("rainbow-delimiters.setup").setup({
+        local rainbow_delimiters =
+            require("rainbow-delimiters")
+
+        vim.g.rainbow_delimiters = {
             strategy = {
-                [''] = rb.strategy['global'],
+                [''] = rainbow_delimiters.strategy.global,
             },
             query = {
                 [''] = 'rainbow-delimiters',
             },
-            -- Cores que combinam com o Fahrenheit (tons de laranja/queimado)
             highlight = {
                 'RainbowDelimiterRed',
                 'RainbowDelimiterYellow',
                 'RainbowDelimiterOrange',
             },
-        })
+        }
     end
 }

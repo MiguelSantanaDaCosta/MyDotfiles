@@ -1,11 +1,19 @@
 return {
     "akinsho/toggleterm.nvim",
+    cmd = { "ToggleTerm", "TermExec" },
 
-    config = function()
-        require("toggleterm").setup({
-            start_in_insert = false
+    keys = {
+        { "<leader>`", "<cmd>ToggleTerm size=10 direction=horizontal<cr>", desc = "Open Bottom Terminal" },
+    },
+
+    opts = { start_in_insert = false },
+
+    init = function()
+        vim.api.nvim_create_autocmd("TermOpen", {
+            pattern = "term://*toggleterm#*",
+            callback = function(ev)
+                vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = ev.buf })
+            end,
         })
-        vim.keymap.set("n", "<leader>`", ":ToggleTerm size=10 direction=horizontal<CR>", { desc = "Open Bottom Terminal", silent = true })  -- Space `
-        vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], {})
-    end
+    end,
 }

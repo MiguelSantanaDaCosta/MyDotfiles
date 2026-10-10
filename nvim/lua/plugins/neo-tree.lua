@@ -1,24 +1,43 @@
 return {
     "nvim-neo-tree/neo-tree.nvim",
+
+    branch = "v3.x",
+
+    cmd = "Neotree",
+
     dependencies = {
         "nvim-lua/plenary.nvim",
         "nvim-tree/nvim-web-devicons",
         "MunifTanjim/nui.nvim",
     },
 
+    keys = {
+        {
+            "<leader>e",
+            function()
+                require("neo-tree.command").execute({
+                    toggle = true,
+                    reveal = true,
+                    dir = vim.uv.cwd(),
+                })
+            end,
+            desc = "Open File Explorer",
+        },
+    },
+
     config = function()
         require("neo-tree").setup({
             filesystem = {
                 filtered_items = {
-                    visible = true,            -- Show hidden file
-                    hide_dotfiles = false,     -- Show dotfile
-                    hide_gitignored = true,    -- Show git ignore file
+                    visible = true,
+                    hide_dotfiles = false,
+                    hide_gitignored = true,
                 },
             },
+
             window = {
-                width = 25, -- Set width window neotree (default 40)
+                width = 25,
             },
         })
-        vim.keymap.set("n", "<leader>e", ":Neotree filesystem reveal left<CR>", { desc = "Open File Explorer", silent = true })  -- Space e
-    end
+    end,
 }

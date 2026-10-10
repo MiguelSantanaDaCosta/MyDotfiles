@@ -1,32 +1,14 @@
 return {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-
     config = function()
-        require("nvim-treesitter.configs").setup({
-            auto_install = true,
-            ensure_installed = {
-                "bash",
-                "lua",
-                "c",
-                "cpp",
-                "python",
-                "javascript",
-                "html",
-                "css",
-                "markdown",
-                "markdown_inline",
-                "java",
-                "json",
-                "yaml",
-                "toml",
-            },
-            highlight = {
-                enable = true,
-            },
-            indent = {
-                enable = true,
-            },
+        require("nvim-treesitter").setup({
+            ensure_installed = { "bash", "lua", "vim", "vimdoc", "query",
+                "c", "cpp", "java", "python", "javascript", "typescript",
+                "html", "css", "json", "yaml", "toml", "markdown", "markdown_inline" },
         })
-    end
+        -- na branch main, highlight e indent são automáticos
+    end,
 }

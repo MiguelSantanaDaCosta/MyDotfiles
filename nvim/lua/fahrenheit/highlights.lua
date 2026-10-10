@@ -1,87 +1,133 @@
 local M = {}
 
 local function hi(group, opts)
-  opts.default = false
   vim.api.nvim_set_hl(0, group, opts)
 end
 
-function M.setup(c)
+-- matchadd é local à janela, então reaplicamos em cada janela
+local function setup_punctuation(c)
+  local rules = {
+    { "FahrenheitParen",     "[()]",     c.blue },
+    { "FahrenheitBrace",     "[{}]",     c.brow },
+    { "FahrenheitBracket",   "[\\[\\]]", c.orange },
+    { "FahrenheitSemicolon", ";",        c.tomato },
+  }
 
+  for _, r in ipairs(rules) do
+    hi(r[1], { fg = r[3], bold = true })
+  end
+
+  local function apply()
+    if vim.w.fahrenheit_matches or vim.bo.buftype ~= "" then
+      return
+    end
+    vim.w.fahrenheit_matches = true
+    for _, r in ipairs(rules) do
+      vim.fn.matchadd(r[1], r[2], 100)
+    end
+  end
+
+  vim.api.nvim_create_autocmd({ "WinEnter", "BufWinEnter" }, {
+    group = vim.api.nvim_create_augroup("FahrenheitPunctuation", { clear = true }),
+    callback = apply,
+  })
+
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    vim.api.nvim_win_call(win, apply)
+  end
+end
+
+function M.setup(c)
   -- 🌑 BASE
   hi("Normal", { fg = c.fg, bg = "NONE" })
+  hi("NormalNC", { fg = c.fg, bg = "NONE" })
   hi("NormalFloat", { fg = c.fg, bg = "NONE" })
-
+  hi("SignColumn", { bg = "NONE" })
   hi("Cursor", { fg = c.bg, bg = c.cursor })
+  hi("CursorLine", { bg = c.cursorline })
   hi("Visual", { bg = c.selection })
-
-  hi("LineNr", { fg = c.bright_black })
+  hi("Search", { fg = c.bg, bg = c.yellow })
+  hi("IncSearch", { fg = c.bg, bg = c.orange, bold = true })
+  hi("MatchParen", { fg = c.orange, bold = true, underline = true })
+  hi("LineNr", { fg = c.comment })
   hi("CursorLineNr", { fg = c.yellow, bold = true })
+  hi("NonText", { fg = c.guide })
+  hi("Folded", { fg = c.comment, bg = c.cursorline })
+  hi("Title", { fg = c.yellow, bold = true })
 
   -- 💬 COMENTÁRIOS
-  hi("Comment", { fg = c.bright_black, italic = true })
+  hi("Comment", { fg = c.comment, italic = true })
 
   -- 🔴 KEYWORDS
-  hi("Keyword", { fg = c.red, bold = true })
-  hi("Statement", { fg = c.red, bold = true })
-  hi("Repeat", { fg = c.red, bold = true })
-
-  hi("@keyword", { fg = c.red, bold = true })
-  hi("@conditional", { fg = c.red, bold = true })
-  hi("@repeat", { fg = c.red, bold = true })
+  for _, g in ipairs({
+    "Keyword", "Statement", "Repeat", "Conditional", "Exception",
+    "@keyword", "@keyword.conditional", "@keyword.repeat",
+    "@keyword.return", "@keyword.function", "@keyword.exception",
+  }) do
+    hi(g, { fg = c.red, bold = true })
+  end
 
   -- 🟡 FUNÇÕES
   hi("Function", { fg = c.yellow, bold = true })
   hi("@function", { fg = c.yellow, bold = true })
   hi("@function.call", { fg = c.yellow })
   hi("@function.method", { fg = c.yellow })
+  hi("@function.method.call", { fg = c.yellow })
+  hi("@function.builtin", { fg = c.yellow })
 
-  -- ⚪ VARIÁVEIS
+  -- ⚪ VARIÁVEIS E PROPRIEDADES
   hi("Identifier", { fg = c.fg })
   hi("@variable", { fg = c.fg })
   hi("@lsp.type.variable", { fg = c.fg })
+  hi("@property", { fg = c.fg })
+  hi("@variable.member", { fg = c.fg })
 
   -- 🟡 PARÂMETROS
-  hi("@parameter", { fg = c.yellow, bold = true })
+  hi("@variable.parameter", { fg = c.yellow, bold = true })
   hi("@lsp.type.parameter", { fg = c.yellow, bold = true })
-
-  -- ⚪ PROPRIEDADES
-  hi("@property", { fg = c.fg })
-  hi("@field", { fg = c.fg })
 
   -- 🟢 STRINGS
   hi("String", { fg = c.green, bold = true })
   hi("@string", { fg = c.green, bold = true })
   hi("@string.escape", { fg = c.yellow, bold = true })
-  hi("@string.regex", { fg = c.magenta })
+  hi("@string.regexp", { fg = c.magenta })
 
-  -- 🟡 NÚMEROS
+  -- 🟡 NÚMEROS, BOOLEANOS E CONSTANTES
   hi("Number", { fg = c.yellow })
   hi("Boolean", { fg = c.yellow })
   hi("@number", { fg = c.yellow })
   hi("@boolean", { fg = c.yellow })
+  hi("Constant", { fg = c.yellow })
+  hi("@constant", { fg = c.yellow })
+  hi("@constant.builtin", { fg = c.orange })
 
-  -- ⚪ OPERADORES
+  -- ⚪ OPERADORES E PONTUAÇÃO
   hi("Operator", { fg = c.fg })
   hi("@operator", { fg = c.fg })
+  hi("@punctuation.delimiter", { fg = c.fg })
 
-  -- 🟤 TIPOS
+  -- 🟤 TIPOS, MÓDULOS E MISC
   hi("Type", { fg = c.magenta, bold = true })
   hi("@type", { fg = c.magenta })
+  hi("@type.builtin", { fg = c.magenta })
+  hi("@module", { fg = c.wood })
+  hi("Special", { fg = c.orange })
+  hi("PreProc", { fg = c.choco })
 
-  -- ⚠️ LSP
-  hi("DiagnosticError", { fg = c.red, bold = true })
+  -- ⚠️ DIAGNÓSTICOS
+  hi("DiagnosticError", { fg = c.firebrick, bold = true })
   hi("DiagnosticWarn", { fg = c.yellow, bold = true })
-  hi("DiagnosticInfo", { fg = c.bright_black })
-  hi("DiagnosticHint", { fg = c.bright_black })
+  hi("DiagnosticInfo", { fg = c.comment })
+  hi("DiagnosticHint", { fg = c.comment })
+  hi("DiagnosticUnderlineError", { undercurl = true, sp = c.firebrick })
+  hi("DiagnosticUnderlineWarn", { undercurl = true, sp = c.yellow })
 
   -- 📊 UI
   hi("StatusLine", { fg = c.fg, bg = "NONE" })
   hi("VertSplit", { fg = c.black })
   hi("WinSeparator", { fg = c.black })
-
   hi("Pmenu", { fg = c.fg, bg = c.black })
   hi("PmenuSel", { fg = c.bg, bg = c.yellow, bold = true })
-
   hi("FloatBorder", { fg = c.yellow })
 
   -- 🔍 Telescope
@@ -96,47 +142,18 @@ function M.setup(c)
   hi("NeoTreeFileName", { fg = c.fg })
   hi("NeoTreeRootName", { fg = c.red, bold = true })
 
-  -- 📏 INDENTAÇÃO
-  hi("IblIndent", { fg = c.bright_black, bold = true })
-  hi("IblScope", { fg = c.yellow, bold = true })
+  -- 📏 INDENTAÇÃO (snacks.indent)
+  hi("SnacksIndent", { fg = c.guide })
+  hi("SnacksIndentScope", { fg = c.yellow })
+  hi("SnacksIndentChunk", { fg = c.yellow })
 
   -- 🔧 GIT
   hi("GitSignsAdd", { fg = c.green, bold = true })
   hi("GitSignsChange", { fg = c.yellow })
   hi("GitSignsDelete", { fg = c.red, bold = true })
 
-  -- ⚡ CMP
-  hi("CmpItemKind", { fg = c.yellow })
-  hi("CmpItemKindVariable", { fg = c.fg })
-  hi("CmpItemKindProperty", { fg = c.fg })
-  hi("CmpItemKindField", { fg = c.fg })
-
-   
-  -- ==============================
--- 🎯 PONTUAÇÃO AVANÇADA
--- ==============================
-
-vim.fn.clearmatches()
-
--- () → blue
-vim.fn.matchadd("FahrenheitParen", "[()]", 100)
-hi("FahrenheitParen", { fg = c.blue, bold = true })
-
--- {} → brow
-vim.fn.matchadd("FahrenheitBrace", "[{}]", 100)
-hi("FahrenheitBrace", { fg = c.brow, bold = true })
-
--- [] → orange
-vim.fn.matchadd("FahrenheitBracket", "[\\[\\]]", 100)
-hi("FahrenheitBracket", { fg = c.orange, bold = true })
-
--- ; → tomato
-vim.fn.matchadd("FahrenheitSemicolon", ";", 100)
-hi("FahrenheitSemicolon", { fg = c.tomato, bold = true })
-
-
-
-
+  -- 🎯 PONTUAÇÃO POR TIPO
+  setup_punctuation(c)
 end
 
 return M

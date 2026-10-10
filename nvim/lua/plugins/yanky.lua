@@ -10,11 +10,11 @@ return {
             enabled = true,
         },
     },
-    config = function(_, opts)
-        require("yanky").setup(opts)
-        
-        -- Colar ajustando a identação automaticamente
-        vim.keymap.set({"n", "x"}, "p", "<Plug>(YankPutAfterFilter)", { desc = "Colar com auto-identação" })
-        vim.keymap.set({"n", "x"}, "P", "<Plug>(YankPutBeforeFilter)", { desc = "Colar antes com auto-identação" })
-    end
+  config = function(_, opts)
+    require("yanky").setup(opts)
+    vim.keymap.set({ "n", "x" }, "p", "<Plug>(YankPutAfterFilter)", { desc = "Paste indented" })
+    vim.keymap.set({ "n", "x" }, "P", "<Plug>(YankPutBeforeFilter)", { desc = "Paste before indented" })
+    -- histórico de yank
+    vim.keymap.set("n", "<leader>y", "<cmd>YankyRingHistory<cr>", { desc = "Yank History" })
+end 
 }

@@ -1,37 +1,86 @@
-local keymap = vim.keymap.set
-
--- Setup Keymaps Neovim --
-
--- Set leader
+-- ============================================================
+-- Leaders (defina no init.lua ANTES de plugins carregarem)
+-- ============================================================
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
--- Relativenumber toggle
-keymap("n", "<leader>rn", ":set relativenumber!<CR>", { desc = "Relativenumber Toggle", silent = true })    -- Space r n
+local keymap = vim.keymap.set
 
--- General clear highlights
-keymap("n", "<Esc>", ":noh<CR>", { desc = "General Clear Highlights", silent = true })
+-- ============================================================
+-- Opções que afetam splits
+-- ============================================================
+vim.opt.splitright = true
+vim.opt.splitbelow = true
 
--- Resize pane
-keymap("n", "<A-=>", "<C-w>+", { desc = "Make Window Taller" })     -- Alt =
-keymap("n", "<A-->", "<C-w>-", { desc = "Make Window Shorter" })    -- Alt -
-keymap("n", "<A-,>", "<C-w>>", { desc = "Make Window Wider" })      -- Alt ,
-keymap("n", "<A-.>", "<C-w><", { desc = "Make Window Narrower" })   -- Alt .
+-- ============================================================
+-- Geral
+-- ============================================================
+keymap("n", "<Esc>", ":noh<CR>", { desc = "Limpar Destaques", silent = true })
+keymap("n", "<leader>rn", ":set relativenumber!<CR>", { desc = "Alternar Relativenumber", silent = true })
 
--- Move on pane
-keymap("n", "<C-K>", "<C-w>k", { desc = "Move To Upper Pane" })     -- Ctrl k
-keymap("n", "<C-J>", "<C-w>j", { desc = "Move To Bottom Pane" })    -- Ctrl j
-keymap("n", "<C-H>", "<C-w>h", { desc = "Move To Left Pane" })      -- Ctrl h
-keymap("n", "<C-L>", "<C-w>l", { desc = "Move To Right Pane" })     -- Ctrl l
+-- ============================================================
+-- Redimensionar janela
+-- ============================================================
+keymap("n", "<A-=>", "<C-w>+", { desc = "Aumentar Altura da Janela" })
+keymap("n", "<A-->", "<C-w>-", { desc = "Diminuir Altura da Janela" })
+keymap("n", "<A-,>", "<C-w>>", { desc = "Aumentar Largura da Janela" })
+keymap("n", "<A-.>", "<C-w><", { desc = "Diminuir Largura da Janela" })
 
--- Set move line
-keymap("n", "<A-Up>", ":m .-2<CR>", { desc = "Move Line Up (Normal mode)", silent = true })                 -- Alt Up
-keymap("n", "<A-Down>", ":m .+1<CR>", { desc = "Move Line Down (Normal mode)", silent = true })             -- Alt Down
-keymap("v", "<A-Up>", ":m '<-2<CR>gv=gv", { desc = "Move Line(s) Up (Visual mode)", silent = true })        -- Alt Up
-keymap("v", "<A-Down>", ":m '>+1<CR>gv=gv", { desc = "Move Line(s) Down (Visual mode)", silent = true })    -- Alt Down
+-- ============================================================
+-- Navegação entre janelas
+-- ============================================================
+keymap("n", "<C-K>", "<C-w>k", { desc = "Mover para Janela Acima" })
+keymap("n", "<C-J>", "<C-w>j", { desc = "Mover para Janela Abaixo" })
+keymap("n", "<C-H>", "<C-w>h", { desc = "Mover para Janela à Esquerda" })
+keymap("n", "<C-L>", "<C-w>l", { desc = "Mover para Janela à Direita" })
 
--- Indentation
-keymap("n", "<Tab>", ">>", { desc = "Indent Line (Normal mode)" })              -- Tab
-keymap("n", "<S-Tab>", "<<", { desc = "Unindent Line (Normal mode)" })          -- Shift Tab
-keymap("v", "<Tab>", ">gv", { desc = "Indent Selection (Visual mode)" })        -- Tab
-keymap("v", "<S-Tab>", "<gv", { desc = "Unindent Selection (Visual mode)" })    -- Shift Tab
+-- ============================================================
+-- Mover linhas
+-- ============================================================
+keymap("n", "<A-Up>", ":m .-2<CR>", { desc = "Mover Linha para Cima", silent = true })
+keymap("n", "<A-Down>", ":m .+1<CR>", { desc = "Mover Linha para Baixo", silent = true })
+keymap("v", "<A-Up>", ":m '<-2<CR>gv=gv", { desc = "Mover Linhas para Cima", silent = true })
+keymap("v", "<A-Down>", ":m '>+1<CR>gv=gv", { desc = "Mover Linhas para Baixo", silent = true })
+
+-- ============================================================
+-- Indentação
+-- ============================================================
+keymap("n", "<Tab>", ">>", { desc = "Indentar Linha" })
+keymap("n", "<S-Tab>", "<<", { desc = "Desindentar Linha" })
+keymap("v", "<Tab>", ">gv", { desc = "Indentar Seleção" })
+keymap("v", "<S-Tab>", "<gv", { desc = "Desindentar Seleção" })
+
+-- ============================================================
+-- Maximizar / restaurar janela atual
+-- ============================================================
+vim.api.nvim_create_user_command("MaximizeToggle", function()
+	if vim.w.maximized then
+		vim.cmd(vim.w.maximized_restore)
+		vim.w.maximized = false
+	else
+		vim.w.maximized_restore = vim.fn.winrestcmd()
+		vim.cmd("wincmd |") -- maximizar largura
+		vim.cmd("wincmd _") -- maximizar altura
+		vim.w.maximized = true
+	end
+end, { desc = "Maximizar/Restaurar janela" })
+
+-- ============================================================
+-- Splits
+-- ============================================================
+keymap("n", "<leader>wv", "<cmd>vsplit<CR>", { desc = "Split Vertical" })
+keymap("n", "<leader>wh", "<cmd>split<CR>", { desc = "Split Horizontal" })
+keymap("n", "<leader>wc", "<cmd>close<CR>", { desc = "Fechar Janela" })
+keymap("n", "<leader>wo", "<cmd>only<CR>", { desc = "Manter Apenas Esta Janela" })
+keymap("n", "<leader>w=", "<C-w>=", { desc = "Igualar Tamanho das Janelas" })
+keymap("n", "<leader>wx", "<C-w>x", { desc = "Trocar Janelas de Lugar" })
+keymap("n", "<leader>wm", "<cmd>MaximizeToggle<CR>", { desc = "Maximizar/Restaurar Janela" })
+
+-- Abrir um arquivo diretamente em split:  :Vs arquivo  /  :Hs arquivo
+vim.api.nvim_create_user_command("Vs", function(opts)
+	vim.cmd("vsplit " .. vim.fn.fnameescape(opts.args))
+end, { nargs = 1, complete = "file", desc = "Abrir arquivo em split vertical" })
+
+vim.api.nvim_create_user_command("Hs", function(opts)
+	vim.cmd("split " .. vim.fn.fnameescape(opts.args))
+end, { nargs = 1, complete = "file", desc = "Abrir arquivo em split horizontal" })

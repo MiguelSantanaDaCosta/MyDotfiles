@@ -1,66 +1,82 @@
+-- Terminal flutuante (pop-up) centralizado
+local function float_term()
+	Snacks.terminal(nil, {
+		win = {
+			position = "float",
+			border = "rounded",
+			width = 0.85,
+			height = 0.8,
+		},
+	})
+end
+
 return {
-  "folke/snacks.nvim",
-  priority = 1000,
-  lazy = false,
-  opts = {
-    -- 1. Dashboard (Mantenha desativado ou use como backup do Alpha)
-    dashboard = { enabled = false }, 
+	"folke/snacks.nvim",
+	priority = 1000,
+	lazy = false,
+	opts = {
+		dashboard = { enabled = false }, -- o alpha cuida disso
 
-    -- 2. Notificações (Interface moderna e rápida)
-    notifier = {
-      enabled = true,
-      timeout = 3000,
-      style = "fancy",
-    },
+		notifier = { enabled = true, timeout = 3000, style = "fancy" },
 
-    -- 3. Scope & Indent (Linhas de indentação estéticas)
-    indent = {
-      enabled = true,
-      char = "│",
-      scope = {
-        enabled = true, -- Destaca o bloco onde o cursor está
-        char = "▎",
-        underline = false,
-      },
-      chunk = { enabled = true },
-    },
+		indent = {
+			enabled = true,
+			char = "│",
+			scope = { enabled = true, char = "▎", underline = false },
+			chunk = { enabled = true },
+		},
 
-    -- 4. Picker (Substitui buscas complexas do Telescope se quiser)
-    picker = { enabled = true },
+		picker = { enabled = false }, -- você usa o Telescope
+		input = { enabled = true },
+		select = { enabled = false }, -- telescope-ui-select já cuida
 
-    -- 5. Input & Select (Janelas flutuantes arredondadas para o sistema)
-    input = { enabled = true },
-    select = { enabled = true },
+		image = { enabled = true },
+		bigfile = { enabled = true },
+		quickfile = { enabled = true },
+		statuscolumn = { enabled = true },
+		words = { enabled = false },
 
-    -- 6. Imagens (Crucial para ver docs com imagens no terminal)
-    image = { enabled = true },
+		terminal = {
+			enabled = true,
+			win = { style = "terminal", border = "rounded" },
+		},
 
-    -- 7. Utilitários de Performance e UI
-    bigfile = { enabled = true },    -- Abre arquivos gigantes sem travar o buffer
-    quickfile = { enabled = true },  -- Carregamento instantâneo
-    statuscolumn = { enabled = true }, -- Margem esquerda limpa e moderna
-    words = { enabled = false },      -- Grifa palavras idênticas sob o cursor
-    
-    -- 8. Terminal flutuante (Configurado para o seu estilo)
-    terminal = {
-      enabled = true,
-      win = {
-        style = "terminal",
-        border = "rounded",
-      },
-    },
+		scroll = { enabled = true },
+		zen = { enabled = false }, -- você usa o zen-mode.nvim
+		util = { enabled = true },
+	},
 
-    -- 9. Outros módulos úteis
-    scroll = { enabled = true },     -- Scroll suave (se não usar outro plugin de scroll)
-    zen = { enabled = true },        -- Modo escrita limpa
-    util = { enabled = true },
-  },
-  keys = {
-    -- Atalhos recomendados para o Snacks
-    { "<leader>n",  function() Snacks.notifier.show_history() end, desc = "Histórico de Notificações" },
-    { "<leader>un", function() Snacks.notifier.hide() end,         desc = "Limpar Notificações" },
-    { "<leader>gb", function() Snacks.git.blame_line() end,        desc = "Git Blame Line" },
-    { "<leader>lg", function() Snacks.lazygit() end,               desc = "Abrir LazyGit" },
-    { "<c-/>",      function() Snacks.terminal() end,              desc = "Terminal Flutuante" },
-  },
+	keys = {
+		{
+			"<leader>n",
+			function()
+				Snacks.notifier.show_history()
+			end,
+			desc = "Histórico de Notificações",
+		},
+		{
+			"<leader>un",
+			function()
+				Snacks.notifier.hide()
+			end,
+			desc = "Limpar Notificações",
+		},
+		{
+			"<leader>gb",
+			function()
+				Snacks.git.blame_line()
+			end,
+			desc = "Git Blame Line",
+		},
+		{
+			"<leader>lg",
+			function()
+				Snacks.lazygit()
+			end,
+			desc = "Abrir LazyGit",
+		},
+		{ "<c-/>", float_term, desc = "Terminal Flutuante", mode = { "n", "t" } },
+		{ "<c-_>", float_term, desc = "Terminal Flutuante", mode = { "n", "t" } },
+		{ "<A-t>", float_term, desc = "Terminal Flutuante", mode = { "n", "t" } },
+	},
 }

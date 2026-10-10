@@ -1,44 +1,49 @@
+-- Gerado por Matugen. NÃO edite manualmente.
 local M = {}
 
 M.colors = {
-  -- base
-  bg = "#000000",
-  fg = "#ffffce",
+	-- base
+	bg = "#191114",
+	fg = "#efdfe2",
 
-  cursor = "#bbbbbb",
-  selection = "#4e739f",
-  selection_fg = "#ffffce",
+	cursor = "#efdfe2",
+	selection = "#6f334b",
+	selection_fg = "#ffd9e3",
 
-  -- ANSI 0-7
-  black   = "#1d1d1d",
-  red     = "#cda074",
-  green   = "#ad8157",
-  yellow  = "#fecf75",
-  blue    = "#7f0e0f",
-  magenta = "#734c4d",
-  cyan    = "#ee2c2c", -- agora virou vermelho forte
-  white   = "#ffffce",
+	comment = "#9e8c91",
+	guide = "#514347",
+	cursorline = "#22191c",
 
-  -- extras
-  tomato  = "#FF6347",
-  sienna  = "#A0522D",
-  rosy    = "#BC8F8F",
-  wood    = "#DEB887",
-  firebrick = "#ee2c2c",
-  brow    = "#a52a2a",
-  choco   = "#d2691e",
-  indi    = "#8b4513",
-  orange  = "#ffa500",
+	-- ANSI 0-7
+	black = "#261d20",
+	red = "#ffb4ab",
+	green = "#ffb0cb",
+	yellow = "#f0bc95",
+	blue = "#ffb0cb",
+	magenta = "#e2bdc8",
+	cyan = "#623f21",
+	white = "#efdfe2",
 
-  -- ANSI 8-15
-  bright_black   = "#1c1c1c",
-  bright_red     = "#fecea0",
-  bright_green   = "#cc734d",
-  bright_yellow  = "#fd9f4d",
-  bright_blue    = "#cb4a05",
-  bright_magenta = "#1c1c1c",
-  bright_cyan    = "#fed04d",
-  bright_white   = "#ffffff",
+	-- extras (compatibilidade com highlights.lua)
+	tomato = "#ffb4ab",
+	sienna = "#93000a",
+	rosy = "#514347",
+	wood = "#e2bdc8",
+	firebrick = "#ffb4ab",
+	brow = "#ffb4ab",
+	choco = "#f0bc95",
+	indi = "#93000a",
+	orange = "#f0bc95",
+
+	-- ANSI 8-15
+	bright_black = "#31282a",
+	bright_red = "#ffb4ab",
+	bright_green = "#6f334b",
+	bright_yellow = "#f0bc95",
+	bright_blue = "#ffb0cb",
+	bright_magenta = "#e2bdc8",
+	bright_cyan = "#623f21",
+	bright_white = "#efdfe2",
 }
 
 return M

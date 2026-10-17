@@ -1,0 +1,61 @@
+return {
+	"fcpg/vim-fahrenheit",
+	lazy = false,
+	priority = 1000,
+	config = function()
+		-- 1. Carrega o tema Fahrenheit
+		vim.cmd("colorscheme fahrenheit")
+
+		-- 2. Função para aplicar transparência e negrito
+		local function apply_fahrenheit_customizations()
+			-- Grupos que precisam ficar transparentes (fundo = none)
+			local transparent_groups = {
+				"Normal",
+				"NormalNC",
+				"SignColumn",
+				"EndOfBuffer",
+				"LineNr",
+				"CursorLineNr",
+				"Folded",
+				"VertSplit",
+				"WinSeparator",
+			}
+
+			for _, group in ipairs(transparent_groups) do
+				vim.api.nvim_set_hl(0, group, { bg = "none" })
+			end
+
+			-- Grupos que vão ficar em negrito (bold) para melhorar a leitura
+			-- Baseado na paleta do tema, os comentários e palavras-chave são bons candidatos
+			local bold_groups = {
+				"Comment",
+				"Function",
+				"Keyword",
+				"String",
+				"Type",
+				"Identifier",
+				"Statement",
+				"Conditional",
+				"Repeat",
+				"Operator",
+			}
+
+			for _, group in ipairs(bold_groups) do
+				local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
+				if hl then
+					hl.bold = true
+					vim.api.nvim_set_hl(0, group, hl)
+				end
+			end
+		end
+
+		-- 3. Aplica as configurações na inicialização
+		apply_fahrenheit_customizations()
+
+		-- 4. Reaplica caso você mude de tema e volte para o fahrenheit
+		vim.api.nvim_create_autocmd("ColorScheme", {
+			pattern = "fahrenheit",
+			callback = apply_fahrenheit_customizations,
+		})
+	end,
+}

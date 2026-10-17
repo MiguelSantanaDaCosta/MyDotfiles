@@ -46,7 +46,18 @@ require("autocmds")
 -- ============================================================
 require("lazy").setup({
 	spec = {
-		{ import = "plugins" },
+		-- Plugins organizados por funcionalidade (lua/plugins/<pasta>/)
+		{ import = "plugins.themes" },
+		{ import = "plugins.ui" },
+		{ import = "plugins.navigation" },
+		{ import = "plugins.editor" },
+		{ import = "plugins.treesitter" },
+		{ import = "plugins.lsp" },
+		{ import = "plugins.coding" },
+		{ import = "plugins.run-debug" },
+		{ import = "plugins.git" },
+		{ import = "plugins.tools" },
+		{ import = "plugins" }, -- arquivos soltos na raiz (se sobrar algum)
 	},
 
 	-- Tema usado durante a instalação inicial (fallback se falhar)
@@ -76,12 +87,41 @@ require("lazy").setup({
 })
 
 -- ============================================================
--- 5. TEMA FAHRENHEIT (com fallback em cascata)
+-- 5. TEMA (lembra o último escolhido; padrão: fahrenheit)
 -- ============================================================
-local themes = { "fahrenheit", "catppuccin-mocha", "habamax" }
+local theme_file = vim.fn.stdpath("state") .. "/colorscheme.txt"
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+	desc = "Salvar o tema e limpar restos do Fahrenheit",
+	callback = function(ev)
+		pcall(vim.fn.writefile, { ev.match }, theme_file)
+
+		-- A pontuação colorida do Fahrenheit usa matchadd; ao trocar de tema, removemos
+		if ev.match ~= "fahrenheit" then
+			pcall(vim.api.nvim_del_augroup_by_name, "FahrenheitPunctuation")
+			for _, win in ipairs(vim.api.nvim_list_wins()) do
+				vim.api.nvim_win_call(win, function()
+					vim.w.fahrenheit_matches = nil
+					for _, m in ipairs(vim.fn.getmatches()) do
+						if m.group:match("^Fahrenheit") then
+							pcall(vim.fn.matchdelete, m.id)
+						end
+					end
+				end)
+			end
+		end
+	end,
+})
+
+local themes = { "fahrenheit", "gruvbox", "catppuccin-mocha", "habamax" }
+if vim.fn.filereadable(theme_file) == 1 then
+	local saved = vim.fn.readfile(theme_file)[1]
+	if saved and saved ~= "" then
+		table.insert(themes, 1, saved)
+	end
+end
 for _, theme in ipairs(themes) do
-	local ok = pcall(vim.cmd.colorscheme, theme)
-	if ok then
+	if pcall(vim.cmd.colorscheme, theme) then
 		break
 	end
 end
@@ -209,37 +249,15 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- ============================================================
--- 9. HOT-RELOAD DO MATUGEN (File Watcher Silencioso)
+-- 9. TRUE COLOR + ÍCONES
 -- ============================================================
 -- Ativar cores hexadecimais no terminal (True Color)
 vim.opt.termguicolors = true
 
--- Observa mudanças no arquivo gerado pelo Matugen
-local palette_path = vim.fn.expand("~/.config/nvim/lua/fahrenheit/palette.lua")
-local w = vim.uv.new_fs_event()
-
-if w then
-	w:start(
-		palette_path,
-		{},
-		vim.schedule_wrap(function()
-			-- 1. Limpa o módulo de cores antigo da memória
-			package.loaded["fahrenheit.palette"] = nil
-			package.loaded["fahrenheit.highlights"] = nil
-			package.loaded["fahrenheit"] = nil
-
-			-- 2. Recarrega as novas cores em tempo real
-			pcall(vim.cmd.colorscheme, "fahrenheit")
-
-			-- 3. Força a atualização da interface visual
-			vim.cmd("redraw!")
-		end)
-	)
-end
-
 require("mini.icons").setup({
 	-- customizar depois do setup:
 })
+if vim.g.colors_name == "fahrenheit" then
 vim.api.nvim_set_hl(0, "MiniIconsAzure", { fg = "#784943" })
 vim.api.nvim_set_hl(0, "MiniIconsBlue", { fg = "#784943" })
 vim.api.nvim_set_hl(0, "MiniIconsCyan", { fg = "#784943" })
@@ -258,4 +276,5 @@ if ok then
 			pcall(vim.api.nvim_set_hl, 0, "DevIcon" .. name, { fg = "#784943" })
 		end
 	end
+end
 end

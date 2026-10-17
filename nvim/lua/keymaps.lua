@@ -84,3 +84,17 @@ end, { nargs = 1, complete = "file", desc = "Abrir arquivo em split vertical" })
 vim.api.nvim_create_user_command("Hs", function(opts)
 	vim.cmd("split " .. vim.fn.fnameescape(opts.args))
 end, { nargs = 1, complete = "file", desc = "Abrir arquivo em split horizontal" })
+
+-- ============================================================
+-- Atalhos de conforto
+-- ============================================================
+keymap({ "n", "i", "x", "s" }, "<C-s>", "<cmd>w<CR><Esc>", { desc = "Salvar arquivo" })
+keymap("n", "<leader>qq", "<cmd>qa<CR>", { desc = "Sair do Neovim" })
+keymap("n", "<leader>bn", "<cmd>enew<CR>", { desc = "Novo buffer vazio" })
+
+-- Rolar a tela mantendo o cursor no meio
+keymap("n", "<C-d>", "<C-d>zz", { desc = "Descer meia tela" })
+keymap("n", "<C-u>", "<C-u>zz", { desc = "Subir meia tela" })
+
+-- Colar sobre uma seleção sem perder o que estava copiado
+keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })

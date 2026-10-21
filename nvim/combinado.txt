@@ -1,4 +1,4 @@
---- SUMÁRIO DE ARQUIVOS (105 arquivos) ---
+--- SUMÁRIO DE ARQUIVOS (109 arquivos) ---
 lua/plugins/editor/Ufo.lua
 lua/plugins/editor/autopairs.lua
 lua/plugins/editor/better-escape.lua
@@ -53,8 +53,10 @@ lua/plugins/themes/gen.lua
 lua/plugins/themes/gruvbox.lua
 lua/plugins/themes/kanagawa.lua
 lua/plugins/themes/miasma.lua
-lua/plugins/themes/themes.lua
 lua/plugins/themes/README.md
+lua/plugins/themes/themes.lua
+lua/plugins/themes/black-metal.lua
+lua/plugins/themes/ashen.lua
 lua/plugins/run-debug/dap-virtual-text.lua
 lua/plugins/run-debug/dap.lua
 lua/plugins/run-debug/database.lua
@@ -100,10 +102,12 @@ lua/milli/splashes/moth.lua
 lua/options.lua
 lua/autocmds.lua
 lua/keymaps.lua
+lua/transparency.lua
 lazy-lock.json
 colors/tomorrow-burns.lua
 colors/fahrenheit.lua
 init.lua
+lazyvim.json
 -------------------------------------------
 ===== lua/plugins/editor/Ufo.lua =====
 -- Folding estilo VSCode com treesitter/indent
@@ -3791,82 +3795,6 @@ return {
 	},
 }
 
-===== lua/plugins/themes/themes.lua =====
--- Temas para testar (todos lazy: carregam só quando você roda :colorscheme <nome>)
--- Todos com fundo transparente e negrito onde o tema permite.
-return {
-	-- :colorscheme rose-pine-moon | rose-pine
-	{
-		"rose-pine/neovim",
-		name = "rose-pine",
-		lazy = true,
-		opts = {
-			variant = "moon",
-			styles = { bold = true, italic = true, transparency = true },
-		},
-	},
-
-	-- :colorscheme vague
-	{
-		"vague2k/vague.nvim",
-		lazy = true,
-		opts = { transparent = true, bold = true, italic = true },
-	},
-
-	-- :colorscheme duskfox | carbonfox | nordfox | terafox | nightfox
-	{
-		"EdenEast/nightfox.nvim",
-		lazy = true,
-		opts = {
-			options = {
-				transparent = true,
-				styles = { comments = "italic,bold", keywords = "bold", functions = "bold", types = "bold" },
-			},
-		},
-	},
-
-	-- :colorscheme tokyonight-moon | tokyonight-night | tokyonight-storm
-	{
-		"folke/tokyonight.nvim",
-		lazy = true,
-		opts = {
-			style = "moon",
-			transparent = true,
-			styles = {
-				comments = { italic = true, bold = true },
-				keywords = { bold = true },
-				functions = { bold = true },
-				sidebars = "transparent",
-				floats = "transparent",
-			},
-		},
-	},
-
-	-- :colorscheme gruvbox-material
-	{
-		"sainnhe/gruvbox-material",
-		lazy = true,
-		init = function()
-			vim.g.gruvbox_material_background = "medium"
-			vim.g.gruvbox_material_transparent_background = 1
-			vim.g.gruvbox_material_enable_bold = 1
-			vim.g.gruvbox_material_enable_italic = 1
-		end,
-	},
-
-	-- :colorscheme everforest
-	{
-		"sainnhe/everforest",
-		lazy = true,
-		init = function()
-			vim.g.everforest_background = "medium"
-			vim.g.everforest_transparent_background = 1
-			vim.g.everforest_enable_italic = 1
-			vim.g.everforest_better_performance = 1
-		end,
-	},
-}
-
 ===== lua/plugins/themes/README.md =====
 # themes/ — Esquemas de cores (temas)
 
@@ -4343,6 +4271,280 @@ return {
 
 ---
 
+
+===== lua/plugins/themes/themes.lua =====
+return {
+	"ficcdaf/ashen.nvim",
+	tag = "*",
+	lazy = false,
+	priority = 1000,
+	config = function()
+		-- 1. Definição das Variantes
+		local variants = {
+			normal = {
+				transparent = true,
+				style = { bold = true },
+				colors = {
+					foreground = "#D3D3D3",
+					red_ember = "#FF5A5A",
+				},
+			},
+			dark = {
+				transparent = false, -- Desliga transparência para ficar legível
+				style = { bold = true },
+				colors = {
+					background = "#0A0A0A",
+					foreground = "#E0E0E0",
+					red_ember = "#FF6B6B",
+				},
+			},
+			light = {
+				transparent = false,
+				style = { bold = true },
+				colors = {
+					background = "#FFFFFF",
+					foreground = "#000000",
+					red_ember = "#D32F2F",
+				},
+			},
+		}
+
+		-- 2. Função que aplica a variante
+		local function apply_variant(variant_name)
+			local config = variants[variant_name] or variants.normal
+
+			if variant_name == "light" then
+				vim.o.background = "light"
+			else
+				vim.o.background = "dark"
+			end
+
+			require("ashen").setup(config)
+			vim.cmd("colorscheme ashen")
+
+			-- Ajuste de legibilidade para os menus na versão transparente
+			if config.transparent then
+				vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+				vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+
+				local menu_bg = "#1A1A1A"
+				vim.api.nvim_set_hl(0, "Pmenu", { fg = "#E0E0E0", bg = menu_bg })
+				vim.api.nvim_set_hl(0, "PmenuSel", { fg = "#000000", bg = "#FF6B6B", bold = true })
+				vim.api.nvim_set_hl(0, "NormalFloat", { fg = "#E0E0E0", bg = menu_bg })
+				vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#FF6B6B", bg = menu_bg })
+			end
+		end
+
+		-- 3. Aplica a variante normal ao iniciar
+		apply_variant("normal")
+
+		-- 4. Cria o comando :Ashen que aceita a sintaxe com espaço e hífen
+		vim.api.nvim_create_user_command("Ashen", function(opts)
+			local variant = opts.args
+
+			-- Remove o hífen (-) caso o usuário digite "-dark" ou "-light"
+			variant = variant:gsub("^%-", "")
+
+			-- Se o usuário digitar apenas :Ashen, usa "normal"
+			if variant == "" then
+				variant = "normal"
+			end
+
+			apply_variant(variant)
+		end, {
+			nargs = "?", -- Aceita 0 ou 1 argumento (com ou sem espaço)
+			complete = function()
+				-- Autocomplete com o hífen para facilitar sua vida
+				return { "-normal", "-dark", "-light" }
+			end,
+		})
+	end,
+}
+
+===== lua/plugins/themes/black-metal.lua =====
+-- Black Metal: 16 temas inspirados em bandas (bathory, burzum, darkthrone...), com fundo transparente.
+-- :colorscheme bathory | bathory-alt | <banda> | <banda>-alt   (variantes light desligadas, trve = true)
+local bands = {
+	"bathory",
+	"burzum",
+	"dark-funeral",
+	"darkthrone",
+	"emperor",
+	"gorgoroth",
+	"immortal",
+	"impaled-nazarene",
+	"khold",
+	"marduk",
+	"mayhem",
+	"nile",
+	"taake",
+	"thyrfing",
+	"venom",
+	"windir",
+}
+
+return {
+	"metalelf0/black-metal-theme-neovim",
+	lazy = true, -- o lazy.nvim carrega sozinho no primeiro :colorscheme <banda>
+	priority = 1000,
+	config = function()
+		local blend = function(a, b, t)
+			return require("black-metal.utils").blend(a, b, t)
+		end
+		-- menus: fundo levemente mais claro que o bg do tema, sempre legível
+		local menu_bg = function(p)
+			return blend(p.fg, p.bg, 0.08)
+		end
+		local sel_bg = function(p)
+			return blend(p.fg, p.bg, 0.20)
+		end
+
+		require("black-metal").setup({
+			theme = "bathory", -- usado por require("black-metal").load()
+			variant = "dark",
+			alt_bg = false,
+			trve = true, -- sem variantes claras (terminal transparente escuro)
+
+			transparent = true, -- não pinta o fundo: o wallpaper aparece
+			plain_float = true, -- janelas flutuantes com borda também sem fundo
+			show_eob = false, -- sem o "~" no fim do buffer
+			dark_gutter = false,
+			cursorline_gutter = false, -- sem faixa de fundo na coluna de sinais
+			term_colors = true,
+
+			diagnostics = {
+				darker = true,
+				undercurl = true,
+				background = false, -- sem faixa de fundo no virtual text
+			},
+			code_style = {
+				comments = "italic",
+				keywords = "bold",
+				functions = "bold",
+				headings = "bold",
+			},
+
+			-- Menus de autocomplete sólidos (o resto fica transparente)
+			highlights = {
+				Pmenu = { fg = "$fg", bg = menu_bg },
+				PmenuSbar = { bg = menu_bg },
+				PmenuSel = { bg = sel_bg, fmt = "bold" },
+				BlinkCmpMenu = { fg = "$fg", bg = menu_bg },
+				BlinkCmpDoc = { fg = "$fg", bg = menu_bg },
+				BlinkCmpMenuSelection = { bg = sel_bg, fmt = "bold" },
+			},
+		})
+
+		-- limpa os fundos de neo-tree, telescope, bufferline, which-key etc. em todos os temas das bandas
+		local patterns = {}
+		for _, b in ipairs(bands) do
+			patterns[#patterns + 1] = b .. "*"
+		end
+		require("theme_transparency").attach("black_metal", patterns, {})
+	end,
+}
+
+===== lua/plugins/themes/ashen.lua =====
+-- Ashen: tema quente e discreto (vermelho, laranja, cinza).
+-- Variantes: normal (transparente), dark (opaca), light (opaca). Uso: :Ashen normal | dark | light
+return {
+	"ficcdaf/ashen.nvim",
+	tag = "*",
+	lazy = false,
+	priority = 1000,
+	config = function()
+		local transparency = require("theme_transparency")
+		local state_file = vim.fn.stdpath("state") .. "/ashen_variant.txt"
+
+		-- true  = janelas flutuantes com fundo sólido; false = transparentes
+		local solid_floats = false
+		local menu_bg = "#1A1A1A" -- fundo dos menus de completar (variante transparente)
+
+		local variants = {
+			normal = {
+				transparent = true,
+				style = { bold = true },
+				style_presets = { bold_functions = true, italic_comments = true },
+				colors = { foreground = "#D3D3D3", red_ember = "#FF5A5A" },
+				-- aplicado pelo próprio Ashen a cada :colorscheme (não se perde ao recarregar)
+				hl = {
+					merge_override = {
+						PmenuSel = { "#000000", "#FF6B6B", { bold = true } },
+						FloatBorder = { "#FF6B6B" },
+					},
+				},
+			},
+			dark = {
+				transparent = false,
+				style = { bold = true },
+				colors = { background = "#0A0A0A", foreground = "#E0E0E0", red_ember = "#FF6B6B" },
+			},
+			light = {
+				transparent = false,
+				style = { bold = true },
+				colors = { background = "#FFFFFF", foreground = "#000000", red_ember = "#D32F2F" },
+			},
+		}
+
+		-- Recarrega o módulo: cada variante começa do zero (nada da anterior sobra)
+		local function reload_ashen()
+			for name in pairs(package.loaded) do
+				if name == "ashen" or name:find("^ashen%.") then
+					package.loaded[name] = nil
+				end
+			end
+		end
+
+		local function apply_variant(name)
+			local cfg = variants[name]
+			if not cfg then
+				vim.notify("Ashen: variante desconhecida: " .. tostring(name), vim.log.levels.WARN)
+				return
+			end
+			vim.g.ashen_variant = name
+			vim.g.ashen_transparent = cfg.transparent
+			vim.o.background = (name == "light") and "light" or "dark"
+			reload_ashen()
+			require("ashen").setup(cfg)
+			vim.cmd.colorscheme("ashen") -- dispara o ColorScheme: o helper limpa os fundos
+			pcall(vim.fn.writefile, { name }, state_file)
+		end
+
+		-- Ao iniciar só PREPARA a última variante usada; quem carrega o tema é o init.lua (tema salvo)
+		local saved = "normal"
+		if vim.fn.filereadable(state_file) == 1 then
+			local v = vim.fn.readfile(state_file)[1]
+			if v and variants[v] then
+				saved = v
+			end
+		end
+		vim.g.ashen_variant = saved
+		vim.g.ashen_transparent = variants[saved].transparent
+		require("ashen").setup(variants[saved])
+
+		-- Transparência extra (neo-tree, telescope, bufferline...) só quando a variante é transparente
+		transparency.attach("ashen", "ashen", {
+			menu_bg = menu_bg,
+			float_bg = solid_floats and menu_bg or nil,
+		}, function()
+			return vim.g.ashen_transparent
+		end)
+
+		-- :Ashen normal | dark | light  (aceita também -normal, -dark, -light)
+		vim.api.nvim_create_user_command("Ashen", function(opts)
+			local v = opts.args:gsub("^%-", "")
+			apply_variant(v == "" and "normal" or v)
+		end, {
+			nargs = "?",
+			complete = function(arglead)
+				local lead = arglead:gsub("^%-", "")
+				return vim.tbl_filter(function(x)
+					return x:find("^" .. lead) ~= nil
+				end, { "normal", "dark", "light" })
+			end,
+		})
+	end,
+}
 
 ===== lua/plugins/run-debug/dap-virtual-text.lua =====
 -- lua/plugins/dap-virtual-text.lua
@@ -9122,11 +9324,139 @@ keymap("n", "<C-u>", "<C-u>zz", { desc = "Subir meia tela" })
 -- Colar sobre uma seleção sem perder o que estava copiado
 keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
 
+===== lua/transparency.lua =====
+-- Deixa um tema transparente em terminais translúcidos (wallpaper atrás do Neovim).
+-- Limpa só o FUNDO dos grupos; as cores de texto do tema continuam.
+local M = {}
+
+-- Grupos que ficam sem fundo
+M.clear = {
+	"Normal",
+	"NormalNC",
+	"NormalFloat",
+	"FloatBorder",
+	"FloatTitle",
+	"FloatFooter",
+	"SignColumn",
+	"LineNr",
+	"LineNrAbove",
+	"LineNrBelow",
+	"CursorLineNr",
+	"CursorLineSign",
+	"FoldColumn",
+	"EndOfBuffer",
+	"MsgArea",
+	"MsgSeparator",
+	"WinSeparator",
+	"VertSplit",
+	"WinBar",
+	"WinBarNC",
+	"TabLine",
+	"TabLineFill",
+	-- neo-tree
+	"NeoTreeNormal",
+	"NeoTreeNormalNC",
+	"NeoTreeEndOfBuffer",
+	"NeoTreeWinSeparator",
+	"NeoTreeFloatNormal",
+	"NeoTreeFloatBorder",
+	"NeoTreeFloatTitle",
+	-- telescope
+	"TelescopeNormal",
+	"TelescopeBorder",
+	"TelescopePromptNormal",
+	"TelescopePromptBorder",
+	"TelescopeResultsNormal",
+	"TelescopeResultsBorder",
+	"TelescopePreviewNormal",
+	"TelescopePreviewBorder",
+	-- bufferline, which-key, trouble, edgy, lazy, mason
+	"BufferLineFill",
+	"BufferLineBackground",
+	"WhichKeyNormal",
+	"WhichKeyBorder",
+	"TroubleNormal",
+	"TroubleNormalNC",
+	"EdgyNormal",
+	"LazyNormal",
+	"MasonNormal",
+}
+
+-- Menus de completar: ficam SÓLIDOS (legibilidade sobre o wallpaper) quando opts.menu_bg é dado
+M.menus = {
+	"Pmenu",
+	"PmenuSbar",
+	"PmenuExtra",
+	"BlinkCmpMenu",
+	"BlinkCmpMenuBorder",
+	"BlinkCmpDoc",
+	"BlinkCmpDocBorder",
+	"BlinkCmpDocSeparator",
+	"BlinkCmpSignatureHelp",
+	"BlinkCmpSignatureHelpBorder",
+}
+
+local function set_bg(group, bg)
+	local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+	if not ok then
+		return
+	end
+	hl = hl or {}
+	hl.bg = bg
+	hl.ctermbg = (bg == "NONE") and "NONE" or nil
+	pcall(vim.api.nvim_set_hl, 0, group, hl)
+end
+
+--- opts.menu_bg    hex  -> fundo sólido para os menus (nil = deixa como o tema definiu)
+--- opts.float_bg   hex  -> fundo sólido para janelas flutuantes (nil = transparentes)
+--- opts.clear_extra     -> lista de grupos extras para ficar sem fundo
+function M.apply(opts)
+	opts = opts or {}
+	for _, g in ipairs(M.clear) do
+		set_bg(g, "NONE")
+	end
+	for _, g in ipairs(opts.clear_extra or {}) do
+		set_bg(g, "NONE")
+	end
+	if opts.float_bg then
+		for _, g in ipairs({ "NormalFloat", "FloatBorder", "FloatTitle" }) do
+			set_bg(g, opts.float_bg)
+		end
+	end
+	if opts.menu_bg then
+		for _, g in ipairs(M.menus) do
+			set_bg(g, opts.menu_bg)
+		end
+	end
+end
+
+--- Reaplica a transparência sempre que um dos temas de `pattern` for carregado.
+--- is_enabled (opcional): função que diz se a transparência está ligada agora.
+function M.attach(name, pattern, opts, is_enabled)
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = vim.api.nvim_create_augroup("ThemeTransparency_" .. name, { clear = true }),
+		pattern = pattern,
+		callback = function()
+			if is_enabled and not is_enabled() then
+				return
+			end
+			-- schedule: roda depois dos outros plugins (bufferline etc.) reaplicarem seus highlights
+			vim.schedule(function()
+				M.apply(opts)
+			end)
+		end,
+	})
+end
+
+return M
+
 ===== lazy-lock.json =====
 {
   "aerial.nvim": { "branch": "master", "commit": "28fe6e822ae344544c379d60fcb13c9519a1f08a" },
   "alpha-nvim": { "branch": "main", "commit": "4ba26e41990c11620c96c0e1cff20eab65efde4a" },
+  "ashen.nvim": { "branch": "main", "commit": "bfb04bd50b69d863469b2deb9fb361cf0d945ba7" },
   "better-escape.nvim": { "branch": "master", "commit": "3f4bc0b326606264ff75967f59091b5ddada0554" },
+  "black-metal-theme-neovim": { "branch": "main", "commit": "227a4cb11980928274c74cdc6e3f4b9b5e329512" },
   "blink.cmp": { "branch": "main", "commit": "78336bc89ee5365633bcf754d93df01678b5c08f" },
   "bufferline.nvim": { "branch": "main", "commit": "655133c3b4c3e5e05ec549b9f8cc2894ac6f51b3" },
   "catppuccin": { "branch": "main", "commit": "edefef779ab08ce1a4a404713e3012b0d202bd35" },
@@ -9134,14 +9464,12 @@ keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
   "diffview.nvim": { "branch": "main", "commit": "4516612fe98ff56ae0415a259ff6361a89419b0a" },
   "dressing.nvim": { "branch": "master", "commit": "2d7c2db2507fa3c4956142ee607431ddb2828639" },
   "edgy.nvim": { "branch": "main", "commit": "8bfd2808994a988c975694122f68624b8a219f5f" },
-  "everforest": { "branch": "master", "commit": "85a86eb62409e3ec88713bff3d1b9d7374e112e4" },
   "fidget.nvim": { "branch": "main", "commit": "9e0201673e08e997e7cf52afca5565c70bd117f3" },
   "flash.nvim": { "branch": "main", "commit": "5f0f270fdc7c5b0c21d903ee85b9cb06f2ac636a" },
   "friendly-snippets": { "branch": "main", "commit": "b4d01b0fdf3c9a549961c2f9ffe8dc09be166219" },
   "git-conflict.nvim": { "branch": "main", "commit": "a1badcd070d176172940eb55d9d59029dad1c5a6" },
   "gitsigns.nvim": { "branch": "main", "commit": "fd780920613e541cbdfac41bf711583ed49f9249" },
   "goto-preview": { "branch": "main", "commit": "d2d6923c9b9e0e43f0b9b566f261a8b1ae016540" },
-  "gruvbox-material": { "branch": "master", "commit": "11d779b26a9ab2b3db8c22c6ac9fb6e8ed4fea79" },
   "gruvbox.nvim": { "branch": "main", "commit": "154eb5ff5b96d0641307113fa385eaf0d36d9796" },
   "gx.nvim": { "branch": "main", "commit": "ba9c408fc0130fc4548760c3933a81b58fc50de8" },
   "harpoon": { "branch": "harpoon2", "commit": "87b1a3506211538f460786c23f98ec63ad9af4e5" },
@@ -9156,7 +9484,7 @@ keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
   "mason.nvim": { "branch": "main", "commit": "2a6940af80375532e5e9e7c1f2fc6319a1b7a69d" },
   "miasma.nvim": { "branch": "main", "commit": "627f2e1cac91de0d1d4dd7472b506a30f41b2b7d" },
   "milli.nvim": { "branch": "main", "commit": "b69890078dfde44cf71d192bbb02027f81aff1b1" },
-  "mini.nvim": { "branch": "main", "commit": "295af26358628c8ba8f007ff6a7e0aec2f642a31" },
+  "mini.nvim": { "branch": "main", "commit": "e4e61006afcf6b399924e64b43c1168fca7b4301" },
   "neo-tree.nvim": { "branch": "v3.x", "commit": "1a14083046d96e88e361d1da00761c40d45012f3" },
   "neogen": { "branch": "main", "commit": "23e7e9f883d01289ebd90e98025acc860ea26366" },
   "neominimap.nvim": { "branch": "main", "commit": "0676085d898019f06044923934e38663f5efa290" },
@@ -9164,7 +9492,6 @@ keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
   "neotest": { "branch": "master", "commit": "27bf921498043f7ecd821d6db68d05de244bbd02" },
   "neotest-java": { "branch": "main", "commit": "51a1389b66e0dbdae628c1dab9f1cfd4e9b0c6f6" },
   "neotest-python": { "branch": "master", "commit": "1b56ca4ba51c6014f986d6548ee629bdc95589d1" },
-  "nightfox.nvim": { "branch": "main", "commit": "4dacd3f0185a2227bdf3b6c0975a8f0bf87cac9a" },
   "noice.nvim": { "branch": "main", "commit": "7bfd942445fb63089b59f97ca487d605e715f155" },
   "nui.nvim": { "branch": "main", "commit": "10fc361835c856ba4233ef5ea135b919bf3dce97" },
   "nvim-autopairs": { "branch": "master", "commit": "3172f40c16563db871a58f20d205c710ad782311" },
@@ -9181,7 +9508,7 @@ keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
   "nvim-nio": { "branch": "master", "commit": "edcc181a875301dd21840189aa2f2f9ad69fc172" },
   "nvim-notify": { "branch": "master", "commit": "8701bece920b38ea289b457f902e2ad184131a5d" },
   "nvim-spectre": { "branch": "master", "commit": "72f56f7585903cd7bf92c665351aa585e150af0f" },
-  "nvim-treesitter": { "branch": "main", "commit": "ca581c3436fc2b236847f5b739ebc263739e5ca6" },
+  "nvim-treesitter": { "branch": "main", "commit": "29212d826054bb2948fa9d3a99eca9bf6a050eb2" },
   "nvim-treesitter-context": { "branch": "master", "commit": "8decd73460d26ef0a0befb745d022dd1fc2c38b8" },
   "nvim-treesitter-textobjects": { "branch": "main", "commit": "5c7b0263797dfd1bd6202f2b219f3b53a80b2187" },
   "nvim-ts-autotag": { "branch": "main", "commit": "d7220b55e16ed3c04e88086256def5d282429493" },
@@ -9200,7 +9527,6 @@ keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
   "refactoring.nvim": { "branch": "master", "commit": "684b3484796ea44595bebbfddee4fa4dbfc90939" },
   "render-markdown.nvim": { "branch": "main", "commit": "8e8795368391036643b622875a6da6a51bcd33f4" },
   "rest.nvim": { "branch": "main", "commit": "714d5512aaec5565d55652480c16c26f8d95645d" },
-  "rose-pine": { "branch": "main", "commit": "ff483051a47e27d84bdef47703538df1ed9f4a47" },
   "snacks.nvim": { "branch": "main", "commit": "882c996cf28183f4d63640de0b4c02ec886d01f2" },
   "sniprun": { "branch": "master", "commit": "647995168a0682b359dfbf49bd3b0e8b9f2026dc" },
   "telescope-fzf-native.nvim": { "branch": "main", "commit": "b25b749b9db64d375d782094e2b9dce53ad53a40" },
@@ -9209,10 +9535,8 @@ keymap("x", "p", '"_dP', { desc = "Colar sem sobrescrever o clipboard" })
   "tiny-inline-diagnostic.nvim": { "branch": "main", "commit": "46ae9b3c8f3039e96ff4497d190ad0aee091f30d" },
   "todo-comments.nvim": { "branch": "main", "commit": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668" },
   "toggleterm.nvim": { "branch": "main", "commit": "9a88eae817ef395952e08650b3283726786fb5fb" },
-  "tokyonight.nvim": { "branch": "main", "commit": "cdc07ac78467a233fd62c493de29a17e0cf2b2b6" },
   "trouble.nvim": { "branch": "main", "commit": "bd67efe408d4816e25e8491cc5ad4088e708a69a" },
   "undotree": { "branch": "master", "commit": "6fa6b57cda8459e1e4b2ca34df702f55242f4e4d" },
-  "vague.nvim": { "branch": "main", "commit": "73f8aaa866bf3d14dd0b0ab9e48c11794c1cb7ab" },
   "vim-dadbod": { "branch": "master", "commit": "6d1d41da4873a445c5605f2005ad2c68c99d8770" },
   "vim-dadbod-completion": { "branch": "master", "commit": "a8dac0b3cf6132c80dc9b18bef36d4cf7a9e1fe6" },
   "vim-dadbod-ui": { "branch": "master", "commit": "afd07819d8efcefc3317205b855ad4e3513b0011" },
@@ -9532,3 +9856,13 @@ if ok then
 end
 end
 
+===== lazyvim.json =====
+{
+  "extras": [
+
+  ],
+  "news": {
+    "NEWS.md": "11866"
+  },
+  "version": 8
+}
